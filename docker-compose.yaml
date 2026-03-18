@@ -1,0 +1,49 @@
+services:
+  battery_backend:
+    container_name: battery_backend
+    hostname: battery_backend
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+      - keydb
+    env_file:
+      - .env
+    networks:
+      - battery_network
+
+  db:
+    image: postgres:16.1
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=batterydb
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=test
+    networks:
+      - battery_network
+
+  keydb:
+    image: "eqalpha/keydb:x86_64_v5.3.3"
+    container_name: keydb
+    command: "keydb-server /etc/keydb/redis.conf --server-threads 2"
+    volumes:
+      - "./keydb_data:/data"
+    ports:
+      - "6379:6379"
+    networks:
+      - battery_network
+
+volumes:
+  data:
+    driver: local
+
+networks:
+  battery_network:
+    driver: bridge

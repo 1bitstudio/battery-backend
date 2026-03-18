@@ -12,7 +12,6 @@ public class UserMapper {
         user.setEmail(createUserDto.getEmail());
         user.setFirstName(createUserDto.getFirstName());
         user.setLastName(createUserDto.getLastName());
-        user.setPassword(createUserDto.getPassword());
         user.setAccountType(AccountType.NOT_CONFIGURED);
         return user;
     }
