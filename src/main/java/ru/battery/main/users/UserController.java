@@ -18,7 +18,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping
+    @PostMapping("/registration")
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto registerUser(@RequestBody @Valid CreateUserDto createUserDto) {
         return userService.createUser(createUserDto);

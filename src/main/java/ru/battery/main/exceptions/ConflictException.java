@@ -1,4 +1,4 @@
-package ru.battery.main.exception;
+package ru.battery.main.exceptions;
 
 public class ConflictException extends RuntimeException {
     public ConflictException(String message) {

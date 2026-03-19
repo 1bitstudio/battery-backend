@@ -1,4 +1,4 @@
-package ru.battery.main.exception;
+package ru.battery.main.exceptions;
 
 public class ValidationException extends RuntimeException {
     public ValidationException(String message) {

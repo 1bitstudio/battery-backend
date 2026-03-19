@@ -1,4 +1,4 @@
-package ru.battery.main.exception;
+package ru.battery.main.exceptions;
 
 public class ForbiddenException extends RuntimeException {
     public ForbiddenException(String message) {

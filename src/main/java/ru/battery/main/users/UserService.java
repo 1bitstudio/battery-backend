@@ -3,15 +3,21 @@ package ru.battery.main.users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.battery.main.exception.ConflictException;
-import ru.battery.main.exception.NotFoundException;
-import ru.battery.main.exception.ValidationException;
+import ru.battery.main.exceptions.ConflictException;
+import ru.battery.main.exceptions.NotFoundException;
+import ru.battery.main.exceptions.ValidationException;
+import ru.battery.main.security.dto.JwtAuthenticationDto;
+import ru.battery.main.security.dto.RefreshTokenDto;
+import ru.battery.main.security.dto.UserCredentialsDto;
+import ru.battery.main.security.jwt.JwtService;
 import ru.battery.main.users.dto.CreateUserDto;
 import ru.battery.main.users.dto.UpdateUserDto;
 import ru.battery.main.users.dto.UserDto;
 import ru.battery.main.users.dto.UserMapper;
 
+import javax.naming.AuthenticationException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -20,14 +26,14 @@ public class UserService {
     private final UserStorage userStorage;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtService jwtService;
 
     public UserDto createUser(CreateUserDto createUserDto) {
-        if (userStorage.findUserByEmail(createUserDto.getEmail()) != null) {
+        if (userStorage.findUserByEmail(createUserDto.getEmail()).isPresent()) {
             throw new ConflictException("Email адрес уже используется!");
         }
         User user = UserMapper.toUserFromCreateDto(createUserDto);
-        String hashedPassword = passwordEncoder.encode(createUserDto.getPassword());
-        user.setPassword(hashedPassword);
+        user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
         User createdUser = userStorage.save(user);
 
         String verifyCode = generatedVerifyCode();
@@ -46,6 +52,20 @@ public class UserService {
         emailService.sendSimpleMessage(user.getEmail(), subject, message);
 
         return UserMapper.toUserDto(createdUser);
+    }
+
+    public JwtAuthenticationDto signIn(UserCredentialsDto userCredentialsDto) throws AuthenticationException {
+        User user = findByCredentials(userCredentialsDto);
+        return jwtService.generateAuthToken(user.getEmail());
+    }
+
+    public JwtAuthenticationDto refreshToken(RefreshTokenDto refreshTokenDto) throws Exception {
+        String refreshToken = refreshTokenDto.getRefreshToken();
+        if (refreshToken != null && jwtService.validateJwtToken(refreshToken)) {
+            User user = findByEmail(jwtService.getEmailFromToken(refreshToken));
+            return jwtService.refreshBaseToken(user.getEmail(), refreshToken);
+        }
+        throw new AuthenticationException("Invalid refresh token");
     }
 
     public List<UserDto> getUsers() {
@@ -98,5 +118,21 @@ public class UserService {
             totalCode.append(random.nextInt(10));
         }
         return totalCode.toString();
+    }
+
+    private User findByCredentials(UserCredentialsDto userCredentialsDto) throws AuthenticationException {
+        Optional<User> optionalUser = userStorage.findUserByEmail(userCredentialsDto.getEmail());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (passwordEncoder.matches(userCredentialsDto.getPassword(), user.getPassword())) {
+                return user;
+            }
+        }
+        throw new AuthenticationException("Неверный адрес электронной почты или пароль");
+    }
+
+    private User findByEmail(String email) {
+        return userStorage.findUserByEmail(email).orElseThrow(() ->
+                new NotFoundException(String.format("Пользователь с электронной почтой " + "%s не найден", email)));
     }
 }

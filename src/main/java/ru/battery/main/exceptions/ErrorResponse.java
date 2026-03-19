@@ -1,4 +1,4 @@
-package ru.battery.main.exception;
+package ru.battery.main.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
