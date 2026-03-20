@@ -1,6 +1,7 @@
 package ru.battery.main.users;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.battery.main.exceptions.ConflictException;
@@ -16,6 +17,7 @@ import ru.battery.main.users.dto.UserDto;
 import ru.battery.main.users.dto.UserMapper;
 
 import javax.naming.AuthenticationException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -27,6 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtService jwtService;
+    private final StringRedisTemplate redisTemplate;
 
     public UserDto createUser(CreateUserDto createUserDto) {
         if (userStorage.findUserByEmail(createUserDto.getEmail()).isPresent()) {
@@ -38,6 +41,7 @@ public class UserService {
 
         String verifyCode = generatedVerifyCode();
         //save to keydb
+        saveToKeyDb("user:" + user.getEmail(), verifyCode);
         String subject = "Подтверждение электронной почты";
         String message = String.format(
                 "Здравствуйте!\n\n" +
@@ -134,5 +138,20 @@ public class UserService {
     private User findByEmail(String email) {
         return userStorage.findUserByEmail(email).orElseThrow(() ->
                 new NotFoundException(String.format("Пользователь с электронной почтой " + "%s не найден", email)));
+    }
+
+    private void saveToKeyDb(String key, String value) {
+        redisTemplate.opsForValue().set(key, value, Duration.ofMinutes(5));
+    }
+
+    public UserDto verifyUser(Long userId, String verifyCode) {
+        User user = userStorage.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователя с ID: " + userId + " не существует!"));
+        String trueCode = redisTemplate.opsForValue().get("user:" + user.getEmail());
+        if (trueCode != null && trueCode.equals(verifyCode)) {
+            user.setAccountType(AccountType.CONFIGURED);
+            return UserMapper.toUserDto(userStorage.save(user));
+        }
+        throw new ValidationException("Указан неправильный код подтверждения или срок его действия истек");
     }
 }

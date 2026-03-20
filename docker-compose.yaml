@@ -25,7 +25,7 @@ services:
     environment:
       - POSTGRES_DB=batterydb
       - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=Z3rGCMIzApQiI20yYy66Eeq
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
       - battery_network
 

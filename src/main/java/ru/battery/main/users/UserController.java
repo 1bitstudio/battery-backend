@@ -43,4 +43,9 @@ public class UserController {
     public void deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
     }
+
+    @PatchMapping("/verify/{userId}")
+    public UserDto verifyUser(@PathVariable Long userId, @RequestBody String verifyCode) {
+        return userService.verifyUser(userId, verifyCode);
+    }
 }
