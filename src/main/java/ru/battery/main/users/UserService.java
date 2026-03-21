@@ -40,7 +40,6 @@ public class UserService {
         User createdUser = userStorage.save(user);
 
         String verifyCode = generatedVerifyCode();
-        //save to keydb
         saveToKeyDb("user:" + user.getEmail(), verifyCode);
         String subject = "Подтверждение электронной почты";
         String message = String.format(
@@ -50,7 +49,7 @@ public class UserService {
                         "Пожалуйста, введите этот код в течение 5 минут, чтобы завершить подтверждение.\n\n" +
                         "Если вы не запрашивали этот код — просто проигнорируйте это письмо.\n\n" +
                         "С уважением,\n" +
-                        "Команда поддержки \"Ыт Студии\"",
+                        "Команда поддержки \"ЫТ Студии\"",
                 verifyCode
         );
         emailService.sendSimpleMessage(user.getEmail(), subject, message);
@@ -60,7 +59,7 @@ public class UserService {
 
     public JwtAuthenticationDto signIn(UserCredentialsDto userCredentialsDto) throws AuthenticationException {
         User user = findByCredentials(userCredentialsDto);
-        return jwtService.generateAuthToken(user.getEmail());
+        return jwtService.generateAuthToken(user.getEmail(), user.getId());
     }
 
     public JwtAuthenticationDto refreshToken(RefreshTokenDto refreshTokenDto) throws Exception {
@@ -84,9 +83,6 @@ public class UserService {
     public UserDto updateUser(Long userId, UpdateUserDto updateUserDto) {
         User user = userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователя с ID: " + userId + " не существует!"));
-        if (updateUserDto.getEmail() != null && !updateUserDto.getEmail().equals(user.getEmail())) {
-            user.setEmail(updateUserDto.getEmail());
-        }
 
         if (updateUserDto.getFirstName() != null && !updateUserDto.getFirstName().equals(user.getFirstName())) {
             user.setFirstName(updateUserDto.getFirstName());

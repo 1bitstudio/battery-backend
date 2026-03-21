@@ -25,10 +25,11 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    public JwtAuthenticationDto generateAuthToken(String email) {
+    public JwtAuthenticationDto generateAuthToken(String email, Long userId) {
         JwtAuthenticationDto jwtDto = new JwtAuthenticationDto();
         jwtDto.setAccessToken(generateJwtToken(email));
         jwtDto.setRefreshToken(generateRefreshToken(email));
+        jwtDto.setUserId(userId);
         return jwtDto;
     }
 

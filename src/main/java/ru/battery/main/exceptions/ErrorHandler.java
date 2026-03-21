@@ -51,7 +51,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException e) {
-        return new ErrorResponse(e.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler

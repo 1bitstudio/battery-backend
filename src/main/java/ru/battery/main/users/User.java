@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "first_name", nullable = false)
@@ -31,6 +32,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
-    @Column(name = "date_created")
+    @Column(name = "datetime_created")
     private LocalDateTime createdAt;
 }
