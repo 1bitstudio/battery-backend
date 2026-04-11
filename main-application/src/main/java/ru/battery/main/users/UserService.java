@@ -11,10 +11,7 @@ import ru.battery.main.security.dto.JwtAuthenticationDto;
 import ru.battery.main.security.dto.RefreshTokenDto;
 import ru.battery.main.security.dto.UserCredentialsDto;
 import ru.battery.main.security.jwt.JwtService;
-import ru.battery.main.users.dto.CreateUserDto;
-import ru.battery.main.users.dto.UpdateUserDto;
-import ru.battery.main.users.dto.UserDto;
-import ru.battery.main.users.dto.UserMapper;
+import ru.battery.main.users.dto.*;
 
 import javax.naming.AuthenticationException;
 import java.time.Duration;
@@ -27,9 +24,9 @@ import java.util.Random;
 public class UserService {
     private final UserStorage userStorage;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
     private final JwtService jwtService;
     private final StringRedisTemplate redisTemplate;
+    private final SendEmailKafkaProducer sendEmailKafkaProducer;
 
     public UserDto createUser(CreateUserDto createUserDto) {
         if (userStorage.findUserByEmail(createUserDto.getEmail()).isPresent()) {
@@ -41,18 +38,8 @@ public class UserService {
 
         String verifyCode = generatedVerifyCode();
         saveToKeyDb("user:" + user.getEmail(), verifyCode);
-        String subject = "Подтверждение электронной почты";
-        String message = String.format(
-                "Здравствуйте!\n\n" +
-                        "Вы запрашивали код для подтверждения электронной почты.\n\n" +
-                        "Ваш код: %s\n\n" +
-                        "Пожалуйста, введите этот код в течение 5 минут, чтобы завершить подтверждение.\n\n" +
-                        "Если вы не запрашивали этот код — просто проигнорируйте это письмо.\n\n" +
-                        "С уважением,\n" +
-                        "Команда поддержки \"ЫТ Студии\"",
-                verifyCode
-        );
-        emailService.sendSimpleMessage(user.getEmail(), subject, message);
+
+        sendEmailKafkaProducer.sendEmailToKafka(new SendEmailDto(user.getEmail(), verifyCode));
 
         return UserMapper.toUserDto(createdUser);
     }
