@@ -3,15 +3,12 @@ package ru.battery.main.users.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.battery.main.users.AccountType;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-    private String firstName;
+public class SendEmailDto {
+    private String email;
 
-    private String lastName;
-
-    private AccountType accountType;
+    private String verifyCode;
 }
