@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PredictionResultDto {
-    @JsonProperty("predicted_soh")
     private Double predictedSoh;
 
-    @JsonProperty("predicted_soh_percent")
     private Double predictedSohPercent;
 
-    @JsonProperty("target_cycle")
     private Integer targetCycle;
 }

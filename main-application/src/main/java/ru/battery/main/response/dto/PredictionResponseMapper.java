@@ -6,11 +6,15 @@ public class PredictionResponseMapper {
     public static PredictionResponse toPredictionResponseFromPredictionResponseDto(PredictionResponseDto
                                                                                            predictionResponseDto) {
         PredictionResponse predictionResponse = new PredictionResponse();
-        predictionResponse.setPredictedSoh(predictionResponseDto.getResult().getPredictedSoh());
-        predictionResponse.setPredictedSohPercent(predictionResponseDto.getResult().getPredictedSohPercent());
         predictionResponse.setStatus(predictionResponseDto.getStatus());
-        predictionResponse.setTargetCycle(predictionResponseDto.getResult().getTargetCycle());
-        predictionResponse.setError(predictionResponseDto.getError());
+        if (predictionResponseDto.getError() != null) {
+            predictionResponse.setError(predictionResponseDto.getError());
+        }
+        if (predictionResponseDto.getResult() != null) {
+            predictionResponse.setPredictedSoh(predictionResponseDto.getResult().getPredictedSoh());
+            predictionResponse.setPredictedSohPercent(predictionResponseDto.getResult().getPredictedSohPercent());
+            predictionResponse.setTargetCycle(predictionResponseDto.getResult().getTargetCycle());
+        }
         return predictionResponse;
     }
 }

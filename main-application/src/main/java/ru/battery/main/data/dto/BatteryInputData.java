@@ -1,5 +1,6 @@
 package ru.battery.main.data.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,8 @@ import java.util.List;
 public class BatteryInputData {
     private Double nominalCapacityInAh;
 
-    private List<Double> SOHInterval;
+    @JsonProperty("SOCInterval")
+    private List<Double> SOCInterval;
 
     private List<CycleData> cycleData;
 

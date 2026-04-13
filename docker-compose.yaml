@@ -73,6 +73,8 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+    networks:
+      - battery_network
 
 volumes:
   data:
@@ -80,4 +82,5 @@ volumes:
 
 networks:
   battery_network:
+    name: code_battery_network
     driver: bridge
