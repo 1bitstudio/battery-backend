@@ -20,10 +20,6 @@ public class BatteryDataMapper {
         batteryData.setFormFactor(csvRows.getFormFactor());
         batteryData.setAnodeComposition(csvRows.getAnodeComposition());
         batteryData.setCathodeComposition(csvRows.getCathodeComposition());
-        batteryData.setDepthOfCharge(csvRows.getDepthOfCharge());
-        batteryData.setDepthOfDischarge(csvRows.getDepthOfDischarge());
-        batteryData.setMinVoltageLimitInV(csvRows.getMinVoltageLimitInV());
-        batteryData.setMaxVoltageLimitInV(csvRows.getMaxVoltageLimitInV());
         return batteryData;
     }
 
@@ -42,10 +38,6 @@ public class BatteryDataMapper {
         csvRows.setFormFactor(batteryData.getFormFactor());
         csvRows.setAnodeComposition(batteryData.getAnodeComposition());
         csvRows.setCathodeComposition(batteryData.getCathodeComposition());
-        csvRows.setDepthOfCharge(batteryData.getDepthOfCharge());
-        csvRows.setDepthOfDischarge(batteryData.getDepthOfDischarge());
-        csvRows.setMinVoltageLimitInV(batteryData.getMinVoltageLimitInV());
-        csvRows.setMaxVoltageLimitInV(batteryData.getMaxVoltageLimitInV());
         return csvRows;
     }
 }
