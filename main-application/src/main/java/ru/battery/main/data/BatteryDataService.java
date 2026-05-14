@@ -31,7 +31,8 @@ public class BatteryDataService {
     private final BatteryDataStorage batteryDataStorage;
     private final RequestStorage requestStorage;
     private final UserStorage userStorage;
-    private final KafkaTemplate<String, MlRequest> kafkaTemplate;
+    private final KafkaTemplate<String, MlRequestForRul> kafkaTemplateForRul;
+    private final KafkaTemplate<String, MlRequestForSoh> kafkaTemplateForSoh;
 
     private final Set<String> requiredBatteryDateHeaders = Set.of(
             "cycle_number",
@@ -41,8 +42,12 @@ public class BatteryDataService {
             "charge_capacity_in_Ah",
             "discharge_capacity_in_Ah",
             "nominal_capacity_in_Ah",
-            "soc_start",
-            "soc_end"
+            "time_in_s",
+            "temperature_in_C",
+            "internal_resistance_in_ohm",
+            "form_factor",
+            "anode_composition",
+            "cathode_composition"
     );
 
     public CreateBatteryDataDto sendDataToMl(Long userId, String requestName, MultipartFile file) {
@@ -59,10 +64,10 @@ public class BatteryDataService {
 
         validateCommonFields(csvRows);
 
-        int obsCycles = csvRows.stream()
-                .mapToInt(CsvRows::getCycleNumber)
-                .max()
-                .orElseThrow(() -> new ValidationException("CSV файл не содержит циклов"));
+        int obsCycles = (int) csvRows.stream()
+                .map(CsvRows::getCycleNumber)
+                .distinct()
+                .count();
 
         Request request = requestStorage.save(createRequest(user, requestName, file));
 
@@ -73,11 +78,47 @@ public class BatteryDataService {
 
         batteryDataStorage.saveAll(listForSaveData);
 
-        MlRequest mlRequest = toMlRequest(csvRows, obsCycles, request.getId());
+        MlRequestForRul mlRequestForRul = toMlRequestForRul(csvRows, obsCycles, request.getId());
 
-        kafkaTemplate.send("data", mlRequest);
+        kafkaTemplateForRul.send("rul-data", mlRequestForRul);
 
         return new CreateBatteryDataDto(request.getId(), csvRows);
+    }
+
+    public void createSohPrediction(Long userId, Long requestId, List<Integer> targetCycles) {
+        User user = userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с ID = " +
+                userId + " не найден"));
+        Request request = requestStorage.findById(requestId).orElseThrow(() -> new NotFoundException("Запроса с ID = " +
+                requestId + " не найден"));
+
+        if (!request.getUser().equals(user)) {
+            throw new ForbiddenException("У пользователя с ID = " + userId + "нет доступа к запросу с ID =" + requestId);
+        }
+
+        if (targetCycles.isEmpty()) {
+            throw new ValidationException("Значения не переданы или переданы неправильно");
+        }
+
+        List<Integer> notPositiveCycleNumbers = targetCycles.stream().filter(cycleNumber -> cycleNumber < 0)
+                .toList();
+        if (!notPositiveCycleNumbers.isEmpty()) {
+            throw new ValidationException("Все номера циклов должны быть положительными");
+        }
+
+        List<BatteryData> batteryDataForRequest = batteryDataStorage.findAllByRequestId(requestId);
+        if (batteryDataForRequest.isEmpty()) {
+            throw new ValidationException("Данные для данного запроса не существуют");
+        }
+
+        List<CsvRows> csvRows = batteryDataForRequest.stream().map(BatteryDataMapper::toCsvRowsFromBatteryData).toList();
+        int obsCycles = (int) csvRows.stream()
+                .map(CsvRows::getCycleNumber)
+                .distinct()
+                .count();
+        MlRequestForSoh mlRequestForSoh = MlRequestMapper.fromMlRequestForRulToMlRequestForSoh(toMlRequestForRul(csvRows,
+                        obsCycles, request.getId()), targetCycles);
+
+        kafkaTemplateForSoh.send("soh-data", mlRequestForSoh);
     }
 
     private Request createRequest(User user, String requestName, MultipartFile file) {
@@ -127,8 +168,12 @@ public class BatteryDataService {
                         parseDouble(record, "charge_capacity_in_Ah"),
                         parseDouble(record, "discharge_capacity_in_Ah"),
                         parseDouble(record, "nominal_capacity_in_Ah"),
-                        parseDouble(record, "soc_start"),
-                        parseDouble(record, "soc_end")
+                        parseDouble(record, "time_in_s"),
+                        parseDouble(record, "temperature_in_C"),
+                        parseDouble(record, "internal_resistance_in_ohm"),
+                        parseString(record, "form_factor"),
+                        parseString(record, "anode_composition"),
+                        parseString(record, "cathode_composition")
                 );
                 rows.add(row);
             }
@@ -166,6 +211,16 @@ public class BatteryDataService {
         }
     }
 
+    private String parseString(CSVRecord record, String column) {
+        String value = record.get(column);
+
+        if (value == null || value.isBlank()) {
+            throw new ValidationException("Пустое значение в колонке: " + column);
+        }
+
+        return value.trim();
+    }
+
     private void validateHeaders(Set<String> actualHeaders) {
         Set<String> normalizedHeaders = actualHeaders.stream()
                 .map(String::trim)
@@ -182,27 +237,41 @@ public class BatteryDataService {
     }
 
     private void validateCommonFields(List<CsvRows> csvRows) {
+        if (csvRows.isEmpty()) {
+            throw new ValidationException("CSV файл не содержит данных");
+        }
+
         CsvRows firstRow = csvRows.get(0);
 
         Double expectedNominalCapacity = firstRow.getNominalCapacityInAh();
-        Double expectedSocStart = firstRow.getSocStart();
-        Double expectedSocEnd = firstRow.getSocEnd();
+        String expectedFormFactor = firstRow.getFormFactor();
+        String expectedAnodeComposition = firstRow.getAnodeComposition();
+        String expectedCathodeComposition = firstRow.getCathodeComposition();
 
         for (CsvRows row : csvRows) {
             if (!expectedNominalCapacity.equals(row.getNominalCapacityInAh())) {
                 throw new ValidationException("Во всех строках nominal_capacity_in_Ah должен быть одинаковым");
             }
-            if (!expectedSocStart.equals(row.getSocStart()) || !expectedSocEnd.equals(row.getSocEnd())) {
-                throw new ValidationException("Во всех строках soc_start и soc_end должны быть одинаковыми");
+            if (!expectedFormFactor.equals(row.getFormFactor())) {
+                throw new ValidationException("Во всех строках form_factor должен быть одинаковым");
+            }
+            if (!expectedAnodeComposition.equals(row.getAnodeComposition())) {
+                throw new ValidationException("Во всех строках anode_composition должен быть одинаковым");
+            }
+            if (!expectedCathodeComposition.equals(row.getCathodeComposition())) {
+                throw new ValidationException("Во всех строках cathode_composition должен быть одинаковым");
             }
         }
     }
 
-    private MlRequest toMlRequest(List<CsvRows> csvRows, int obsCycles, Long requestId) {
+    private MlRequestForRul toMlRequestForRul(List<CsvRows> csvRows, int obsCycles, Long requestId) {
+        if (csvRows.isEmpty()) {
+            throw new ValidationException("CSV файл не содержит данных");
+        }
+
         CsvRows firstRow = csvRows.get(0);
 
         Double nominalCapacity = firstRow.getNominalCapacityInAh();
-        List<Double> socInterval = List.of(firstRow.getSocStart(), firstRow.getSocEnd());
 
         Map<Integer, List<CsvRows>> groupedByCycle = csvRows.stream()
                 .collect(Collectors.groupingBy(
@@ -232,20 +301,34 @@ public class BatteryDataService {
                     .map(CsvRows::getDischargeCapacityInAh)
                     .toList();
 
+            List<Double> timeInS = cycleRows.stream()
+                    .map(CsvRows::getTimeInS)
+                    .toList();
+
+            List<Double> temperatureInC = cycleRows.stream()
+                    .map(CsvRows::getTemperatureInC)
+                    .toList();
+
+            List<Double> internalResistanceInOhm = cycleRows.stream()
+                    .map(CsvRows::getInternalResistanceInOhm)
+                    .toList();
+
             CycleData cycleData = new CycleData(
                     voltages,
                     currents,
                     chargeCapacities,
-                    dischargeCapacities
+                    dischargeCapacities,
+                    timeInS,
+                    temperatureInC,
+                    internalResistanceInOhm
             );
 
             cycleDataList.add(cycleData);
         }
 
-        BatteryInputData batteryInputData = new BatteryInputData(nominalCapacity, socInterval,
-                cycleDataList, obsCycles);
+        BatteryInputData batteryInputData = new BatteryInputData(nominalCapacity, cycleDataList, obsCycles);
 
-        return new MlRequest(requestId, batteryInputData);
+        return new MlRequestForRul(requestId, batteryInputData);
     }
 
     public List<CsvRows> getDataByRequestId(Long userId, Long requestId) {

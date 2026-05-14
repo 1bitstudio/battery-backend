@@ -9,7 +9,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.battery.main.data.dto.MlRequest;
+import ru.battery.main.data.dto.MlRequestForRul;
+import ru.battery.main.data.dto.MlRequestForSoh;
 import ru.battery.main.users.dto.SendEmailDto;
 
 import java.util.HashMap;
@@ -34,17 +35,34 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, MlRequest> mlProducerFactory(ObjectMapper objectMapper) {
+    public ProducerFactory<String, MlRequestForRul> mlForRulProducerFactory(ObjectMapper objectMapper) {
         Map<String, Object> configProperties = kafkaConfig();
 
-        JsonSerializer<MlRequest> serializer = new JsonSerializer<>(objectMapper);
+        JsonSerializer<MlRequestForRul> serializer = new JsonSerializer<>(objectMapper);
         serializer.setAddTypeInfo(false);
 
         return new DefaultKafkaProducerFactory<>(configProperties, new StringSerializer(), serializer);
     }
 
     @Bean
-    public KafkaTemplate<String, MlRequest> mlKafkaTemplate(ProducerFactory<String, MlRequest> producerFactory) {
+    public KafkaTemplate<String, MlRequestForRul> mlForRulKafkaTemplate(ProducerFactory<String, MlRequestForRul>
+                                                                                    producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public ProducerFactory<String, MlRequestForSoh> mlForSohProducerFactory(ObjectMapper objectMapper) {
+        Map<String, Object> configProperties = kafkaConfig();
+
+        JsonSerializer<MlRequestForSoh> serializer = new JsonSerializer<>(objectMapper);
+        serializer.setAddTypeInfo(false);
+
+        return new DefaultKafkaProducerFactory<>(configProperties, new StringSerializer(), serializer);
+    }
+
+    @Bean
+    public KafkaTemplate<String, MlRequestForSoh> mlForSohKafkaTemplate(ProducerFactory<String, MlRequestForSoh>
+                                                                        producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 

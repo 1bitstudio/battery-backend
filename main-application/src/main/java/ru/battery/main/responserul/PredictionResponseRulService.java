@@ -1,4 +1,4 @@
-package ru.battery.main.response;
+package ru.battery.main.responserul;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,18 +7,18 @@ import ru.battery.main.exceptions.NotFoundException;
 import ru.battery.main.exceptions.ValidationException;
 import ru.battery.main.requests.Request;
 import ru.battery.main.requests.RequestStorage;
-import ru.battery.main.response.dto.PredictionResponseTotalDto;
+import ru.battery.main.responserul.dto.PredictionResponseRulTotalDto;
 import ru.battery.main.users.User;
 import ru.battery.main.users.UserStorage;
 
 @Service
 @RequiredArgsConstructor
-public class PredictionResponseService {
+public class PredictionResponseRulService {
     private final UserStorage userStorage;
     private final RequestStorage requestStorage;
-    private final PredictionResponseStorage predictionResponseStorage;
+    private final PredictionResponseRulStorage predictionResponseRulStorage;
 
-    public PredictionResponseTotalDto getPredictionResponse(Long userId, Long requestId) {
+    public PredictionResponseRulTotalDto getPredictionResponse(Long userId, Long requestId) {
         User user = userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с ID: " + userId + " не найден."));
         Request request = requestStorage.findById(requestId).orElseThrow(() ->
@@ -28,14 +28,13 @@ public class PredictionResponseService {
                     requestId);
         }
 
-        PredictionResponse predictionResponse = predictionResponseStorage.findByRequestId(requestId).orElseThrow(() ->
+        PredictionResponseRul predictionResponseRul = predictionResponseRulStorage.findByRequestId(requestId).orElseThrow(() ->
                 new NotFoundException("У запроса с ID = " + requestId + " еще нет результат."));
 
-        if (predictionResponse.getError() != null) {
-            throw new ValidationException("Ошибка: " + predictionResponse.getError());
+        if (predictionResponseRul.getError() != null) {
+            throw new ValidationException("Ошибка: " + predictionResponseRul.getError());
         }
 
-        return new PredictionResponseTotalDto(requestId, predictionResponse.getPredictedSoh(),
-                predictionResponse.getPredictedSohPercent(), predictionResponse.getTargetCycle());
+        return new PredictionResponseRulTotalDto(requestId, predictionResponseRul.getPredictedRul());
     }
 }

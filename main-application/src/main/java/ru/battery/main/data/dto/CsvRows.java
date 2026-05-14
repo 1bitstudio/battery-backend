@@ -15,6 +15,10 @@ public class CsvRows {
     private Double chargeCapacityInAh;
     private Double dischargeCapacityInAh;
     private Double nominalCapacityInAh;
-    private Double socStart;
-    private Double socEnd;
+    private Double timeInS;
+    private Double temperatureInC;
+    private Double internalResistanceInOhm;
+    private String formFactor;
+    private String anodeComposition;
+    private String cathodeComposition;
 }

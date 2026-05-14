@@ -42,9 +42,22 @@ public class BatteryData {
     @Column(name = "nominal_capacity_in_ah")
     private Double nominalCapacityInAh;
 
-    @Column(name = "soc_start")
-    private Double socStart;
+    @Column(name = "time_in_s")
+    private Double timeInS;
 
-    @Column(name = "soc_end")
-    private Double socEnd;
+    @Column(name = "temperature_in_c")
+    private Double temperatureInC;
+
+    @Column(name = "internal_resistance_in_ohm")
+    private Double internalResistanceInOhm;
+
+    @Column(name = "form_factor")
+    private String formFactor;
+
+    @Column(name = "anode_composition")
+    private String anodeComposition;
+
+    @Column(name = "cathode_composition")
+    private String cathodeComposition;
+
 }
