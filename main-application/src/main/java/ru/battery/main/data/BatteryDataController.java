@@ -6,7 +6,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.battery.main.data.dto.CreateBatteryDataDto;
 import ru.battery.main.data.dto.CsvRows;
 import ru.battery.main.users.User;
 
@@ -20,10 +19,10 @@ public class BatteryDataController {
 
     @PostMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateBatteryDataDto createBatteryData(@PathVariable Long userId,
+    public void createBatteryData(@PathVariable Long userId,
                                                   @RequestParam(required = false) String requestName,
                                                   @RequestParam("file") MultipartFile file) {
-        return batteryDataService.sendDataToMl(userId, requestName, file);
+        batteryDataService.sendDataToMl(userId, requestName, file);
     }
 
     @GetMapping("/{userId}/{requestId}")
@@ -38,10 +37,10 @@ public class BatteryDataController {
         batteryDataService.createSohPrediction(userId, requestId, targetCycles);
     }
 
-    @PostMapping("/upload")
-    public CreateBatteryDataDto uploadBatteryData(@AuthenticationPrincipal User user,
-                                                  @RequestParam MultipartFile file,
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void uploadBatteryData(@AuthenticationPrincipal User user,
+                                                  @RequestParam("files") List<MultipartFile> files,
                                                   @RequestParam(required = false) String requestName) {
-        return batteryDataService.sendDataToMl(user.getId(), requestName, file);
+        batteryDataService.sendDataToMlWithManyFiles(user.getId(), requestName, files);
     }
 }

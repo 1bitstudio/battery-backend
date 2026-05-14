@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MlRequestForRul {
-    private Long requestId;
+public class StoredFileDto {
+    private String bucket;
 
-    private BatteryInputData batteryInputData;
+    private String objectKey;
+
+    private String originalFilename;
 }

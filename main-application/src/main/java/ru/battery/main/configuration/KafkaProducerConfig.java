@@ -1,4 +1,4 @@
-package ru.battery.main.kafka;
+package ru.battery.main.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -9,7 +9,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.battery.main.data.dto.MlRequestForRul;
+import ru.battery.main.data.dto.FileUploadEventDto;
 import ru.battery.main.data.dto.MlRequestForSoh;
 import ru.battery.main.users.dto.SendEmailDto;
 
@@ -35,18 +35,18 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, MlRequestForRul> mlForRulProducerFactory(ObjectMapper objectMapper) {
+    public ProducerFactory<String, FileUploadEventDto> fileUploadProducerFactory(ObjectMapper objectMapper) {
         Map<String, Object> configProperties = kafkaConfig();
 
-        JsonSerializer<MlRequestForRul> serializer = new JsonSerializer<>(objectMapper);
+        JsonSerializer<FileUploadEventDto> serializer = new JsonSerializer<>(objectMapper);
         serializer.setAddTypeInfo(false);
 
         return new DefaultKafkaProducerFactory<>(configProperties, new StringSerializer(), serializer);
     }
 
     @Bean
-    public KafkaTemplate<String, MlRequestForRul> mlForRulKafkaTemplate(ProducerFactory<String, MlRequestForRul>
-                                                                                    producerFactory) {
+    public KafkaTemplate<String, FileUploadEventDto> fileUploadKafkaTemplate(ProducerFactory<String,
+            FileUploadEventDto> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 
