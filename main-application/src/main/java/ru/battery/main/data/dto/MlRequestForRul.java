@@ -4,15 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BatteryInputData {
-    private Double nominalCapacityInAh;
+public class MlRequestForRul {
+    private Long requestId;
 
-    private List<CycleData> cycleData;
-
-    private Integer obsCycles;
+    private BatteryInputData batteryInputData;
 }

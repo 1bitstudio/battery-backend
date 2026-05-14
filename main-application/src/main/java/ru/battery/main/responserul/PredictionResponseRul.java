@@ -1,4 +1,4 @@
-package ru.battery.main.response;
+package ru.battery.main.responserul;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 import ru.battery.main.requests.Request;
 
 @Entity
-@Table(name = "prediction_response")
+@Table(name = "prediction_response_rul")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PredictionResponse {
+public class PredictionResponseRul {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "response_id")
+    @Column(name = "response_rul_id")
     private Long id;
 
     @ManyToOne
@@ -26,11 +26,5 @@ public class PredictionResponse {
     private String error;
 
     @Column(name = "predicted_soh")
-    private Double predictedSoh;
-
-    @Column(name = "predicted_soh_percent")
-    private Double predictedSohPercent;
-
-    @Column(name = "target_cycle")
-    private Integer targetCycle;
+    private Double predictedRul;
 }

@@ -17,4 +17,10 @@ public class CycleData {
     private List<Double> chargeCapacityInAh;
 
     private List<Double> dischargeCapacityInAh;
+
+    private List<Double> timeInS;
+
+    private List<Double> temperatureInC;
+
+    private List<Double> internalResistanceInOhm;
 }

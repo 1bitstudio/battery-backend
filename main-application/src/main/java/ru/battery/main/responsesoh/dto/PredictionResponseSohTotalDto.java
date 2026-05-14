@@ -1,4 +1,4 @@
-package ru.battery.main.data.dto;
+package ru.battery.main.responsesoh.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MlRequest {
+public class PredictionResponseSohTotalDto {
     private Long requestId;
 
-    private BatteryInputData batteryInputData;
+    private Double predictedSoh;
+
+    private Integer targetCycle;
 }
