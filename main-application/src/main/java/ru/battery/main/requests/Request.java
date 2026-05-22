@@ -28,4 +28,8 @@ public class Request {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "model_type")
+    @Enumerated(EnumType.STRING)
+    private ModelTypes modelType;
 }

@@ -11,6 +11,7 @@ services:
       - db
       - keydb
       - kafka
+      - minio
     env_file:
       - ./main-application/.env
     networks:
@@ -28,6 +29,22 @@ services:
       - kafka
     env_file:
       - ./email-service/.env
+    networks:
+      - battery_network
+
+  file-service:
+    container_name: file-service
+    hostname: file-service
+    ports:
+      - "8082:8080"
+    build:
+      context: ./file-service
+      dockerfile: Dockerfile
+    depends_on:
+      - kafka
+      - minio
+    env_file:
+      - ./file-service/.env
     networks:
       - battery_network
 
@@ -73,11 +90,49 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_MESSAGE_MAX_BYTES: 209715200
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 209715200
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 209715200
+    networks:
+      - battery_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    hostname: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - battery_network
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      mc mb --ignore-existing local/battery-files;
+      mc anonymous set none local/battery-files;
+      exit 0;
+      "
     networks:
       - battery_network
 
 volumes:
   data:
+    driver: local
+
+  minio_data:
     driver: local
 
 networks:
