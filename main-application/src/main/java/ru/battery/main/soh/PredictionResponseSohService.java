@@ -1,4 +1,4 @@
-package ru.battery.main.responsesoh;
+package ru.battery.main.soh;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -6,8 +6,8 @@ import ru.battery.main.exceptions.ForbiddenException;
 import ru.battery.main.exceptions.NotFoundException;
 import ru.battery.main.requests.Request;
 import ru.battery.main.requests.RequestStorage;
-import ru.battery.main.responsesoh.dto.PredictionResponseSohMapper;
-import ru.battery.main.responsesoh.dto.PredictionResponseSohTotalDto;
+import ru.battery.main.soh.dto.PredictionResponseSohMapper;
+import ru.battery.main.soh.dto.PredictionResponseSohTotalDto;
 import ru.battery.main.users.User;
 import ru.battery.main.users.UserStorage;
 

@@ -14,5 +14,7 @@ public class MlRequestForSoh {
 
     private List<Integer> targetCycles;
 
+    private String modelType;
+
     private BatteryInputData batteryInputData;
 }

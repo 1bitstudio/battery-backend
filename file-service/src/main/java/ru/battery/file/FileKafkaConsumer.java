@@ -40,26 +40,23 @@ public class FileKafkaConsumer {
             "nominal_capacity_in_Ah",
             "time_in_s",
             "temperature_in_C",
-            "internal_resistance_in_ohm",
-            "form_factor",
-            "anode_composition",
-            "cathode_composition"
+            "form_factor"
     );
 
     @KafkaListener(topics = "file-data", groupId = "file-read-worker",
             containerFactory = "fileUploadEventContainerFactory")
     public void consume(FileUploadEventDto fileUploadEventDto) {
         try (ResponseInputStream<GetObjectResponse> inputStream =
-                     s3StorageService.downloadFile(fileUploadEventDto.getBucket(), fileUploadEventDto.getObjectKey())) {
+            s3StorageService.downloadFile(fileUploadEventDto.getBucket(), fileUploadEventDto.getObjectKey())) {
 
-            processCsv(fileUploadEventDto.getRequestId(), inputStream);
+            processCsv(fileUploadEventDto.getRequestId(), fileUploadEventDto.getNameModel(), inputStream);
 
         } catch (Exception e) {
             throw new RuntimeException("Ошибка обработки файла из S3", e);
         }
     }
 
-    private void processCsv(Long requestId, ResponseInputStream<GetObjectResponse> inputStream) {
+    private void processCsv(Long requestId, String modelType, ResponseInputStream<GetObjectResponse> inputStream) {
         List<CsvRows> csvRows = parseCsv(inputStream);
 
         validateCommonFields(csvRows);
@@ -75,7 +72,7 @@ public class FileKafkaConsumer {
         }
 
         batteryDataStorage.saveAll(listForSaveData);
-        MlRequestForRul mlRequestForRul = toMlRequestForRul(csvRows, obsCycles, requestId);
+        MlRequestForRul mlRequestForRul = toMlRequestForRul(csvRows, obsCycles, requestId, modelType);
 
         kafkaTemplateForRul.send("rul-data", mlRequestForRul);
     }
@@ -95,6 +92,8 @@ public class FileKafkaConsumer {
             validateHeaders(csvParser.getHeaderMap().keySet());
             List<CsvRows> rows = new ArrayList<>();
             for (CSVRecord record : csvParser) {
+                Double temperatureInC = parseDoubleWithNull(record, "temperature_in_C");
+
                 CsvRows row = new CsvRows(
                         parseInteger(record, "cycle_number"),
                         parseInteger(record, "point_index"),
@@ -104,11 +103,8 @@ public class FileKafkaConsumer {
                         parseDouble(record, "discharge_capacity_in_Ah"),
                         parseDouble(record, "nominal_capacity_in_Ah"),
                         parseDouble(record, "time_in_s"),
-                        parseDouble(record, "temperature_in_C"),
-                        parseDouble(record, "internal_resistance_in_ohm"),
-                        parseString(record, "form_factor"),
-                        parseString(record, "anode_composition"),
-                        parseString(record, "cathode_composition")
+                        temperatureInC,
+                        parseString(record, "form_factor")
                 );
                 rows.add(row);
             }
@@ -137,6 +133,20 @@ public class FileKafkaConsumer {
 
         if (value == null || value.isBlank()) {
             throw new ValidationException("Пустое значение в колонке: " + column);
+        }
+
+        try {
+            return Double.parseDouble(value.trim());
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Некорректное число в колонке " + column + ": " + value);
+        }
+    }
+
+    private Double parseDoubleWithNull(CSVRecord record, String column) {
+        String value = record.get(column);
+
+        if (value == null || value.isBlank()) {
+            return null;
         }
 
         try {
@@ -180,8 +190,6 @@ public class FileKafkaConsumer {
 
         Double expectedNominalCapacity = firstRow.getNominalCapacityInAh();
         String expectedFormFactor = firstRow.getFormFactor();
-        String expectedAnodeComposition = firstRow.getAnodeComposition();
-        String expectedCathodeComposition = firstRow.getCathodeComposition();
 
         for (CsvRows row : csvRows) {
             if (!expectedNominalCapacity.equals(row.getNominalCapacityInAh())) {
@@ -190,16 +198,11 @@ public class FileKafkaConsumer {
             if (!expectedFormFactor.equals(row.getFormFactor())) {
                 throw new ValidationException("Во всех строках form_factor должен быть одинаковым");
             }
-            if (!expectedAnodeComposition.equals(row.getAnodeComposition())) {
-                throw new ValidationException("Во всех строках anode_composition должен быть одинаковым");
-            }
-            if (!expectedCathodeComposition.equals(row.getCathodeComposition())) {
-                throw new ValidationException("Во всех строках cathode_composition должен быть одинаковым");
-            }
         }
     }
 
-    private MlRequestForRul toMlRequestForRul(List<CsvRows> csvRows, int obsCycles, Long requestId) {
+    private MlRequestForRul toMlRequestForRul(List<CsvRows> csvRows, int obsCycles, Long requestId,
+                                              String modelType) {
         if (csvRows.isEmpty()) {
             throw new ValidationException("CSV файл не содержит данных");
         }
@@ -207,6 +210,7 @@ public class FileKafkaConsumer {
         CsvRows firstRow = csvRows.get(0);
 
         Double nominalCapacity = firstRow.getNominalCapacityInAh();
+        String formFactor = firstRow.getFormFactor();
 
         Map<Integer, List<CsvRows>> groupedByCycle = csvRows.stream()
                 .collect(Collectors.groupingBy(
@@ -244,25 +248,20 @@ public class FileKafkaConsumer {
                     .map(CsvRows::getTemperatureInC)
                     .toList();
 
-            List<Double> internalResistanceInOhm = cycleRows.stream()
-                    .map(CsvRows::getInternalResistanceInOhm)
-                    .toList();
-
             CycleData cycleData = new CycleData(
                     voltages,
                     currents,
                     chargeCapacities,
                     dischargeCapacities,
                     timeInS,
-                    temperatureInC,
-                    internalResistanceInOhm
+                    temperatureInC
             );
 
             cycleDataList.add(cycleData);
         }
 
-        BatteryInputData batteryInputData = new BatteryInputData(nominalCapacity, cycleDataList, obsCycles);
+        BatteryInputData batteryInputData = new BatteryInputData(nominalCapacity, formFactor, cycleDataList, obsCycles);
 
-        return new MlRequestForRul(requestId, batteryInputData);
+        return new MlRequestForRul(requestId, modelType, batteryInputData);
     }
 }

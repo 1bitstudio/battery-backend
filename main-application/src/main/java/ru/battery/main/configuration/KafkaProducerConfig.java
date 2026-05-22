@@ -10,6 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import ru.battery.main.data.dto.FileUploadEventDto;
+import ru.battery.main.data.dto.MlRequestForRecommendation;
 import ru.battery.main.data.dto.MlRequestForSoh;
 import ru.battery.main.users.dto.SendEmailDto;
 
@@ -53,6 +54,8 @@ public class KafkaProducerConfig {
     @Bean
     public ProducerFactory<String, MlRequestForSoh> mlForSohProducerFactory(ObjectMapper objectMapper) {
         Map<String, Object> configProperties = kafkaConfig();
+        configProperties.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, 200 * 1024 * 1024);
+        configProperties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 256L * 1024 * 1024);
 
         JsonSerializer<MlRequestForSoh> serializer = new JsonSerializer<>(objectMapper);
         serializer.setAddTypeInfo(false);
@@ -63,6 +66,25 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, MlRequestForSoh> mlForSohKafkaTemplate(ProducerFactory<String, MlRequestForSoh>
                                                                         producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public ProducerFactory<String, MlRequestForRecommendation> mlForRecommendationProducerFactory(
+            ObjectMapper objectMapper) {
+        Map<String, Object> configProperties = kafkaConfig();
+        configProperties.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, 200 * 1024 * 1024);
+        configProperties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 256L * 1024 * 1024);
+
+        JsonSerializer<MlRequestForRecommendation> serializer = new JsonSerializer<>(objectMapper);
+        serializer.setAddTypeInfo(false);
+
+        return new DefaultKafkaProducerFactory<>(configProperties, new StringSerializer(), serializer);
+    }
+
+    @Bean
+    public KafkaTemplate<String, MlRequestForRecommendation> mlForRecommendationKafkaTemplate(ProducerFactory<String,
+            MlRequestForRecommendation> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 

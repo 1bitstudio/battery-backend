@@ -17,4 +17,6 @@ public class FileUploadEventDto {
     private String objectKey;
 
     private String fileName;
+
+    private String nameModel;
 }

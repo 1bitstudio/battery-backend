@@ -1,4 +1,4 @@
-package ru.battery.main.responsesoh;
+package ru.battery.main.soh;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

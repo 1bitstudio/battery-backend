@@ -12,6 +12,8 @@ import java.util.List;
 public class BatteryInputData {
     private Double nominalCapacityInAh;
 
+    private String formFactor;
+
     private List<CycleData> cycleData;
 
     private Integer obsCycles;

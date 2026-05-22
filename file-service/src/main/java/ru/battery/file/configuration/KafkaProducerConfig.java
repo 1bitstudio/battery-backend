@@ -36,6 +36,8 @@ public class KafkaProducerConfig {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
         //config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+        config.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, 200 * 1024 * 1024);
+        config.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 256L * 1024 * 1024);
         return config;
     }
 }

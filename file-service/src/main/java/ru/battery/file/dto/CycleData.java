@@ -21,6 +21,4 @@ public class CycleData {
     private List<Double> timeInS;
 
     private List<Double> temperatureInC;
-
-    private List<Double> internalResistanceInOhm;
 }

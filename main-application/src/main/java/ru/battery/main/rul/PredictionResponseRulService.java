@@ -1,4 +1,4 @@
-package ru.battery.main.responserul;
+package ru.battery.main.rul;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,7 +7,7 @@ import ru.battery.main.exceptions.NotFoundException;
 import ru.battery.main.exceptions.ValidationException;
 import ru.battery.main.requests.Request;
 import ru.battery.main.requests.RequestStorage;
-import ru.battery.main.responserul.dto.PredictionResponseRulTotalDto;
+import ru.battery.main.rul.dto.PredictionResponseRulTotalDto;
 import ru.battery.main.users.User;
 import ru.battery.main.users.UserStorage;
 

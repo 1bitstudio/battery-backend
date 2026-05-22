@@ -1,4 +1,4 @@
-package ru.battery.main.responsesoh.dto;
+package ru.battery.main.rul.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PredictionResponseSohTotalDto {
+public class PredictionResponseRulTotalDto {
     private Long requestId;
 
-    private Double predictedSoh;
-
-    private Integer targetCycle;
+    private Double predictedRul;
 }

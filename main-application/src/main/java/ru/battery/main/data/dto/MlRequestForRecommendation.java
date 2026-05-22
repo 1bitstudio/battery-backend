@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateBatteryDataDto {
+public class MlRequestForRecommendation {
     private Long requestId;
 
-    List<CsvRows> csvRows;
+    private Double nominalVoltageInV;
+
+    private BatteryInputData batteryInputData;
 }

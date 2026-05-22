@@ -1,4 +1,4 @@
-package ru.battery.main.responserul;
+package ru.battery.main.recommendation;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 import ru.battery.main.requests.Request;
 
 @Entity
-@Table(name = "prediction_response_rul")
+@Table(name = "recommendation_response")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PredictionResponseRul {
+public class RecommendationResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "response_rul_id")
+    @Column(name = "recommendation_id")
     private Long id;
 
     @ManyToOne
@@ -23,8 +23,13 @@ public class PredictionResponseRul {
 
     private String status;
 
-    private String error;
+    private String message;
 
-    @Column(name = "predicted_soh")
-    private Double predictedRul;
+    @Column(name = "target_energy_wh")
+    private Double targetEnergyWh;
+
+    @Column(name = "nominal_voltage_in_v")
+    private Double nominalVoltageInV;
+
+    private String error;
 }

@@ -46,15 +46,6 @@ public class BatteryDataFile {
     @Column(name = "temperature_in_c")
     private Double temperatureInC;
 
-    @Column(name = "internal_resistance_in_ohm")
-    private Double internalResistanceInOhm;
-
     @Column(name = "form_factor")
     private String formFactor;
-
-    @Column(name = "anode_composition")
-    private String anodeComposition;
-
-    @Column(name = "cathode_composition")
-    private String cathodeComposition;
 }

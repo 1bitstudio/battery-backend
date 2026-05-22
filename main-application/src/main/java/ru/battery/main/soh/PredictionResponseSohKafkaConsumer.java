@@ -1,4 +1,4 @@
-package ru.battery.main.responsesoh;
+package ru.battery.main.soh;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.battery.main.exceptions.NotFoundException;
 import ru.battery.main.requests.Request;
 import ru.battery.main.requests.RequestStorage;
-import ru.battery.main.responsesoh.dto.PredictionResponseSohDto;
-import ru.battery.main.responsesoh.dto.PredictionResponseSohMapper;
+import ru.battery.main.soh.dto.PredictionResponseSohDto;
+import ru.battery.main.soh.dto.PredictionResponseSohMapper;
 
 @Service
 @RequiredArgsConstructor

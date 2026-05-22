@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 public class MlRequestForRul {
     private Long requestId;
 
+    private String modelType;
+
     private BatteryInputData batteryInputData;
 }

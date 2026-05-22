@@ -17,8 +17,5 @@ public class CsvRows {
     private Double nominalCapacityInAh;
     private Double timeInS;
     private Double temperatureInC;
-    private Double internalResistanceInOhm;
     private String formFactor;
-    private String anodeComposition;
-    private String cathodeComposition;
 }

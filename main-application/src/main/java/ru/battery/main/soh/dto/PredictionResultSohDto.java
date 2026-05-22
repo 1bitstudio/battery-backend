@@ -1,4 +1,4 @@
-package ru.battery.main.responsesoh.dto;
+package ru.battery.main.soh.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

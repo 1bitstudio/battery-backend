@@ -1,6 +1,6 @@
-package ru.battery.main.responsesoh.dto;
+package ru.battery.main.soh.dto;
 
-import ru.battery.main.responsesoh.PredictionResponseSoh;
+import ru.battery.main.soh.PredictionResponseSoh;
 
 public class PredictionResponseSohMapper {
     public static PredictionResponseSoh fromPredictionResponseSohDtoToPredictionResponseSoh(

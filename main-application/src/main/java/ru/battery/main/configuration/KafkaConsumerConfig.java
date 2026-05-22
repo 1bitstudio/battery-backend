@@ -10,8 +10,9 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-import ru.battery.main.responserul.dto.PredictionResponseRulDto;
-import ru.battery.main.responsesoh.dto.PredictionResponseSohDto;
+import ru.battery.main.recommendation.dto.RecommendationResponseDto;
+import ru.battery.main.rul.dto.PredictionResponseRulDto;
+import ru.battery.main.soh.dto.PredictionResponseSohDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +56,27 @@ public class KafkaConsumerConfig {
         var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, PredictionResponseSohDto>();
         containerFactory.setConcurrency(1);
         containerFactory.setConsumerFactory(consumerFactory);
+        return containerFactory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, RecommendationResponseDto> mlRecommendationConsumerFactory(
+            ObjectMapper objectMapper) {
+        Map<String, Object> properties = kafkaConfig();
+
+        JsonDeserializer<RecommendationResponseDto> jsonDeserializer = new JsonDeserializer<>(
+                RecommendationResponseDto.class, objectMapper);
+
+        return new DefaultKafkaConsumerFactory<>(properties, new StringDeserializer(), jsonDeserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, RecommendationResponseDto> mlRecommendationContainerFactory(
+            ConsumerFactory<String, RecommendationResponseDto> consumerFactory) {
+        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, RecommendationResponseDto>();
+        containerFactory.setConcurrency(1);
+        containerFactory.setConsumerFactory(consumerFactory);
+
         return containerFactory;
     }
 

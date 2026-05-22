@@ -16,10 +16,7 @@ public class BatteryDataMapper {
         batteryData.setNominalCapacityInAh(csvRows.getNominalCapacityInAh());
         batteryData.setTimeInS(csvRows.getTimeInS());
         batteryData.setTemperatureInC(csvRows.getTemperatureInC());
-        batteryData.setInternalResistanceInOhm(csvRows.getInternalResistanceInOhm());
         batteryData.setFormFactor(csvRows.getFormFactor());
-        batteryData.setAnodeComposition(csvRows.getAnodeComposition());
-        batteryData.setCathodeComposition(csvRows.getCathodeComposition());
         return batteryData;
     }
 
@@ -34,10 +31,7 @@ public class BatteryDataMapper {
         csvRows.setNominalCapacityInAh(batteryData.getNominalCapacityInAh());
         csvRows.setTimeInS(batteryData.getTimeInS());
         csvRows.setTemperatureInC(batteryData.getTemperatureInC());
-        csvRows.setInternalResistanceInOhm(batteryData.getInternalResistanceInOhm());
         csvRows.setFormFactor(batteryData.getFormFactor());
-        csvRows.setAnodeComposition(batteryData.getAnodeComposition());
-        csvRows.setCathodeComposition(batteryData.getCathodeComposition());
         return csvRows;
     }
 }

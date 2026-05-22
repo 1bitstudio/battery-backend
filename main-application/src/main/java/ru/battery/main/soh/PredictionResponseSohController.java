@@ -1,11 +1,11 @@
-package ru.battery.main.responsesoh;
+package ru.battery.main.soh;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.battery.main.responsesoh.dto.PredictionResponseSohTotalDto;
+import ru.battery.main.soh.dto.PredictionResponseSohTotalDto;
 
 import java.util.List;
 

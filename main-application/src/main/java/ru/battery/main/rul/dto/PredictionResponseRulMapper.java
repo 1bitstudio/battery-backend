@@ -1,6 +1,6 @@
-package ru.battery.main.responserul.dto;
+package ru.battery.main.rul.dto;
 
-import ru.battery.main.responserul.PredictionResponseRul;
+import ru.battery.main.rul.PredictionResponseRul;
 
 public class PredictionResponseRulMapper {
     public static PredictionResponseRul toPredictionResponseFromPredictionResponseDto(PredictionResponseRulDto
