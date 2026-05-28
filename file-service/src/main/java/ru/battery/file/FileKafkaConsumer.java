@@ -1,6 +1,7 @@
 package ru.battery.file;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FileKafkaConsumer {
 
     private final S3StorageService s3StorageService;
@@ -48,6 +50,8 @@ public class FileKafkaConsumer {
     public void consume(FileUploadEventDto fileUploadEventDto) {
         try (ResponseInputStream<GetObjectResponse> inputStream =
             s3StorageService.downloadFile(fileUploadEventDto.getBucket(), fileUploadEventDto.getObjectKey())) {
+
+            log.info("В сервис обработки файлов пришли данные: \n{}", fileUploadEventDto);
 
             processCsv(fileUploadEventDto.getRequestId(), fileUploadEventDto.getNameModel(), inputStream);
 
@@ -75,6 +79,8 @@ public class FileKafkaConsumer {
         MlRequestForRul mlRequestForRul = toMlRequestForRul(csvRows, obsCycles, requestId, modelType);
 
         kafkaTemplateForRul.send("rul-data", mlRequestForRul);
+
+        log.info("В сервис расчета RUL отправлены данные из запроса с ID = {}", mlRequestForRul.getRequestId());
     }
 
     private List<CsvRows> parseCsv(InputStream inputStream) {

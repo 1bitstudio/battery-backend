@@ -31,6 +31,7 @@ public class RecommendationResponseMapper {
         recommendationProfile.setChargeTimeSec(recommendationProfileResult.getChargeTimeSec());
         recommendationProfile.setDeliveredEnergyWh(recommendationProfileResult.getDeliveredEnergyWh());
         recommendationProfile.setThermalRisk(recommendationProfileResult.getThermalRisk());
+        recommendationProfile.setPredictionRul(recommendationProfileResult.getPredictionRul());
         return recommendationProfile;
     }
 
@@ -48,6 +49,7 @@ public class RecommendationResponseMapper {
         recommendationProfileResult.setChargeTimeSec(recommendationProfile.getChargeTimeSec());
         recommendationProfileResult.setDeliveredEnergyWh(recommendationProfile.getDeliveredEnergyWh());
         recommendationProfileResult.setThermalRisk(recommendationProfile.getThermalRisk());
+        recommendationProfileResult.setPredictionRul(recommendationProfile.getPredictionRul());
         return recommendationProfileResult;
     }
 }
