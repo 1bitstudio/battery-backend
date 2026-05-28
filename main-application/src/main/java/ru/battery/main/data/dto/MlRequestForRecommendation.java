@@ -12,5 +12,7 @@ public class MlRequestForRecommendation {
 
     private Double nominalVoltageInV;
 
+    private String modelType;
+
     private BatteryInputData batteryInputData;
 }

@@ -29,4 +29,6 @@ public class RecommendationProfileResult {
     private Double deliveredEnergyWh;
 
     private Double thermalRisk;
+
+    private Double predictionRul;
 }

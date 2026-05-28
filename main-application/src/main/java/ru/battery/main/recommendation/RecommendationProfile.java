@@ -54,4 +54,7 @@ public class RecommendationProfile {
 
     @Column(name = "thermal_risk")
     private Double thermalRisk;
+
+    @Column(name = "prediction_rul")
+    private Double predictionRul;
 }

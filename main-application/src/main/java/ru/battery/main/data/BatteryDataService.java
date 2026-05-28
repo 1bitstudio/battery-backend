@@ -1,6 +1,7 @@
 package ru.battery.main.data;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BatteryDataService {
     private final BatteryDataStorage batteryDataStorage;
     private final RequestStorage requestStorage;
@@ -58,6 +60,8 @@ public class BatteryDataService {
                 modelType.name());
 
         kafkaTemplateForFileUpload.send("file-data", fileUploadEventDto);
+
+        log.info("В сервис обработки файлов отправлены данные: \n{}", fileUploadEventDto);
 
         return request.getId();
     }
@@ -169,7 +173,7 @@ public class BatteryDataService {
                 .count();
 
         MlRequestForRecommendation mlRequestForRecommendation = new MlRequestForRecommendation(requestId,
-                nominalVoltageInV, fromCsvRowsToBatteryInputData(csvRows, obsCycles));
+                nominalVoltageInV, request.getModelType().name(), fromCsvRowsToBatteryInputData(csvRows, obsCycles));
 
         kafkaTemplateForRecommendation.send("recommend-data", mlRequestForRecommendation);
     }

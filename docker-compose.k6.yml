@@ -1,0 +1,16 @@
+services:
+  k6:
+    image: grafana/k6:latest
+    container_name: k6
+    volumes:
+      - ./load-tests/scripts:/scripts
+      - ./load-tests/data:/data
+      - ./load-tests/results:/results
+    environment:
+      BASE_URL: http://host.docker.internal:8080
+      LOGIN_EMAIL: KopIgor2004@yandex.ru
+      LOGIN_PASSWORD: test123
+      USER_ID: 1
+      MODEL_TYPE: NCA
+    networks:
+      - default

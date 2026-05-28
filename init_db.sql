@@ -72,5 +72,6 @@ CREATE TABLE IF NOT EXISTS recommendation_profile (
     predicted_degradation_rate DOUBLE PRECISION NOT NULL,
     charge_time_sec DOUBLE PRECISION NOT NULL,
     delivered_energy_wh DOUBLE PRECISION NOT NULL,
-    thermal_risk DOUBLE PRECISION NOT NULL
+    thermal_risk DOUBLE PRECISION NOT NULL,
+    prediction_rul DOUBLE PRECISION
 );
